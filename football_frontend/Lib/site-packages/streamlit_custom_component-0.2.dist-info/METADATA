@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: streamlit-custom-component
+Version: 0.2
+Summary: A package to create custom Streamlit components easily.
+Home-page: https://github.com/alexgain/streamlined_custom_component
+Author: Alex Gain
+Author-email: alexzgain@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Dist: streamlit
+
+UNKNOWN
+
