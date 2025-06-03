@@ -1,16 +1,12 @@
 # 📁 pages/VideoResult.py
 import base64
 import os
-
-import pandas as pd
 import streamlit as st
 import time
 import requests
 from PIL import Image
 from io import BytesIO
 from config import API_BASE, SESSION_ROOT
-import plotly.express as px
-import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="Video Ergebnis | FootballAI",
@@ -65,7 +61,6 @@ if not st.session_state["redirect_to_only_video_download"]:
 
         time.sleep(2)
 
-
 st.markdown("---")
 st.subheader("🔢 KPI Übersicht zur analysierten Sequenz")
 st.write("")
@@ -96,12 +91,12 @@ if r.status_code == 200:
         "team_2_avg_speed_kmh": ("Ø Geschwindigkeit (km/h)", "team2"),
         "space_control_avg_team_1": ("Raumkontrolle gesamt (%)", "team1"),
         "space_control_avg_team_2": ("Raumkontrolle gesamt (%)", "team2"),
-        "thirds_control_avg_defensive_team_1": ("Defensiv-Kontrolle (%)", "team1"),
-        "thirds_control_avg_defensive_team_2": ("Defensiv-Kontrolle (%)", "team2"),
-        "thirds_control_avg_middle_team_1": ("Mittelfeld-Kontrolle (%)", "team1"),
-        "thirds_control_avg_middle_team_2": ("Mittelfeld-Kontrolle (%)", "team2"),
-        "thirds_control_avg_attacking_team_1": ("Offensiv-Kontrolle (%)", "team1"),
-        "thirds_control_avg_attacking_team_2": ("Offensiv-Kontrolle (%)", "team2"),
+        "thirds_control_avg_defensive_team_1": ("Defensivdrittel Kontrolle (%)", "team1"),
+        "thirds_control_avg_defensive_team_2": ("Defensivdrittel Kontrolle (%)", "team2"),
+        "thirds_control_avg_middle_team_1": ("Mitteldrittel Kontrolle (%)", "team1"),
+        "thirds_control_avg_middle_team_2": ("Mitteldrittel Kontrolle (%)", "team2"),
+        "thirds_control_avg_attacking_team_1": ("Angriffsdrittel Kontrolle (%)", "team1"),
+        "thirds_control_avg_attacking_team_2": ("Angriffsdrittel Kontrolle (%)", "team2"),
     }
 
     # 🔢 Aufteilen nach Team
@@ -144,119 +139,9 @@ if r.status_code == 200:
             label_clean = label.replace("team_2_", "").replace("_", " ")
             colored_metric(label_clean, value, team2["color"])
 
-    st.markdown("---")
-    st.subheader("📊 Radarvergleich der Teams")
-
-    # Metriken fürs Spiderweb
-    spider_labels = [
-        "Ballbesitz (%)",
-        "Tore",
-        "Torschüsse",
-        "Distanz (m)",
-        "Ø Geschwindigkeit (km/h)",
-        "Offensiv-Kontrolle (%)",
-        "Mittelfeld-Kontrolle (%)",
-        "Defensiv-Kontrolle (%)"
-    ]
-
-    # Werte für beide Teams vorbereiten
-    values_team1 = []
-    values_team2 = []
-    hover_team1 = []
-    hover_team2 = []
-    categories = spider_labels.copy()
-
-    for label in spider_labels:
-        val1 = team1_metrics.get(label, 0)
-        val2 = team2_metrics.get(label, 0)
-
-        if "%" in label:
-            # ✅ Prozentwerte direkt verwenden
-            norm1 = val1
-            norm2 = val2
-        else:
-            # 📏 Absolute Werte normieren auf 0–100
-            max_val = max(val1, val2, 1e-5)
-            norm1 = val1 / max_val * 100
-            norm2 = val2 / max_val * 100
-
-        values_team1.append(round(norm1, 2))
-        values_team2.append(round(norm2, 2))
-        hover_team1.append(f"{val1:.2f}")
-        hover_team2.append(f"{val2:.2f}")
-
-    # Polygon schließen
-    values_team1.append(values_team1[0])
-    values_team2.append(values_team2[0])
-    hover_team1.append(hover_team1[0])
-    hover_team2.append(hover_team2[0])
-    categories.append(categories[0])
-
-    # 🕸️ Spiderweb zeichnen
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatterpolar(
-        r=values_team1,
-        theta=categories,
-        fill='toself',
-        name=team1["name"],
-        marker_color=team1["color"],
-        hovertext=hover_team1,
-        hovertemplate="%{theta}<br>" + team1["name"] + ": %{hovertext}",
-        opacity=0.7
-    ))
-
-    fig.add_trace(go.Scatterpolar(
-        r=values_team2,
-        theta=categories,
-        fill='toself',
-        name=team2["name"],
-        marker_color=team2["color"],
-        hovertext=hover_team2,
-        hovertemplate="%{theta}<br>" + team2["name"] + ": %{hovertext}",
-        opacity=0.7
-    ))
-
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-        showlegend=True,
-        template="plotly_dark",
-        height=500,
-        margin=dict(t=40, b=20)
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
 else:
     st.warning("⚠️ Konnte Metriken nicht laden.")
 
-st.markdown("---")
-st.markdown(f'## 📷 Laufwege der Teams')
-# Zwei Spalten erzeugen
-col1, col2 = st.columns(2)
-
-# URL zu den Heatmaps
-url_team1 = f'{API_BASE}/heatmap/{session_id}/{team1["name"]}'
-url_team2 = f'{API_BASE}/heatmap/{session_id}/{team2["name"]}'
-
-# Bild für Team 1
-with col1:
-    r1 = requests.get(url_team1)
-    if r1.status_code == 200:
-        image1 = Image.open(BytesIO(r1.content))
-        st.image(image1, caption=f'Laufwege des {team1["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
-    else:
-        st.error("❌ Heatmap für Team 1 nicht gefunden.")
-
-# Bild für Team 2
-with col2:
-    r2 = requests.get(url_team2)
-    if r2.status_code == 200:
-        image2 = Image.open(BytesIO(r2.content))
-        st.image(image2, caption=f'Laufwege des {team2["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
-    else:
-        st.error("❌ Heatmap für Team 2 nicht gefunden.")
 
 st.markdown("---")
 st.markdown("## 📊 KPI-Daten exportieren")
@@ -340,3 +225,30 @@ with col2:
         unsafe_allow_html=True
     )
 st.markdown("---")
+
+st.markdown(f'## 📷 Laufwege der Teams')
+# Zwei Spalten erzeugen
+col1, col2 = st.columns(2)
+
+# URL zu den Heatmaps
+url_team1 = f'{API_BASE}/heatmap/{session_id}/{team1["name"]}'
+url_team2 = f'{API_BASE}/heatmap/{session_id}/{team2["name"]}'
+
+# Bild für Team 1
+with col1:
+    r1 = requests.get(url_team1)
+    if r1.status_code == 200:
+        image1 = Image.open(BytesIO(r1.content))
+        st.image(image1, caption=f'Laufwege des {team1["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
+    else:
+        st.error("❌ Heatmap für Team 1 nicht gefunden.")
+
+# Bild für Team 2
+with col2:
+    r2 = requests.get(url_team2)
+    if r2.status_code == 200:
+        image2 = Image.open(BytesIO(r2.content))
+        st.image(image2, caption=f'Laufwege des {team2["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
+    else:
+        st.error("❌ Heatmap für Team 2 nicht gefunden.")
+

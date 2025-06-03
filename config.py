@@ -23,6 +23,6 @@ if __name__ == "__main__":
         print("⚠️ Keine Ngrok-URL gefunden.")
 
 # config.py
-API_BASE = "https://liver-experiencing-network-to.trycloudflare.com"
+API_BASE = "https://powell-hopes-winners-spice.trycloudflare.com"
 
 SESSION_ROOT = "../02_FootballAI/sessions"  # relativer Pfad zum Backend
