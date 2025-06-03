@@ -5,7 +5,6 @@ import requests
 import time
 import config
 import streamlit as st
-from streamlit.components.v1 import html
 
 st.set_page_config(
     page_title="Startseite | FootballAI",
