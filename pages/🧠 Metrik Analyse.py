@@ -233,28 +233,39 @@ else:
 
 st.markdown("---")
 st.markdown(f'## 📷 Laufwege der Teams')
-# Zwei Spalten erzeugen
+
+
+# 🔁 Heatmap-Generierung beim Öffnen triggern (wird gecacht)
+@st.cache_data(show_spinner="🧠 Generiere Heatmaps...")
+def trigger_heatmap_generation(session_id):
+    url = f"{API_BASE}/generate-heatmaps/{session_id}"
+    return requests.post(url)
+
+# 🔁 Heatmap-Generierung auslösen
+response = trigger_heatmap_generation(session_id)
+
+# 🔢 Spalten zur Anzeige der beiden Team-Heatmaps
 col1, col2 = st.columns(2)
 
-# URL zu den Heatmaps
-url_team1 = f'{API_BASE}/heatmap/{session_id}/{team1["name"]}'
-url_team2 = f'{API_BASE}/heatmap/{session_id}/{team2["name"]}'
+# 📸 URLs zu den Heatmap-Bildern
+url_team1 = f"{API_BASE}/heatmap/{session_id}/{team1['name']}"
+url_team2 = f"{API_BASE}/heatmap/{session_id}/{team2['name']}"
 
-# Bild für Team 1
+# 🖼️ Team 1 Heatmap
 with col1:
     r1 = requests.get(url_team1)
     if r1.status_code == 200:
         image1 = Image.open(BytesIO(r1.content))
-        st.image(image1, caption=f'Laufwege des {team1["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
+        st.image(image1, caption=f"Laufwege von {team1['name']}", use_container_width=True)
     else:
         st.error("❌ Heatmap für Team 1 nicht gefunden.")
 
-# Bild für Team 2
+# 🖼️ Team 2 Heatmap
 with col2:
     r2 = requests.get(url_team2)
     if r2.status_code == 200:
         image2 = Image.open(BytesIO(r2.content))
-        st.image(image2, caption=f'Laufwege des {team2["name"]} - Abbildung ist im obrigen Download enthalten.', use_container_width=True)
+        st.image(image2, caption=f"Laufwege von {team2['name']}", use_container_width=True)
     else:
         st.error("❌ Heatmap für Team 2 nicht gefunden.")
 
