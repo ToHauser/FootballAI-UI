@@ -17,7 +17,7 @@ st.set_page_config(
     page_icon="⚽",
     layout="wide"
 )
-API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
+API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
 
 session_id = st.session_state.get("session_id")
 if not session_id:

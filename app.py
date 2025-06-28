@@ -20,7 +20,7 @@ if st.session_state.get("redirect_to_team_assignment"):
 
 st.title("⚽ Football Video Analyzer")
 
-API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
+API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
 SESSION_ROOT = config.SESSION_ROOT  # relativer Pfad zum Backend
 
 st.markdown("---")
