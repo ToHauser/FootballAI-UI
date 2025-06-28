@@ -21,7 +21,7 @@ if "active_session" in st.session_state:
     del st.session_state["active_session"]
 
 
-API_BASE = config.API_BASE
+API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
 
 # Session-ID laden
 session_id = st.session_state.get("session_id", None)

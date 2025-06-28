@@ -1,11 +1,13 @@
+import os
 import streamlit as st
 import time
 import requests
-from config import API_BASE
+
 
 # === Konfiguration ===
 st.set_page_config(page_title="Fortschritt | FootballAI", page_icon="⚽", layout="wide")
 
+API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
 session_id = st.session_state.get("session_id")
 if not session_id:
     st.error("❌ Keine Session aktiv.")

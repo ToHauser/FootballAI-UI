@@ -8,7 +8,7 @@ import time
 import requests
 from PIL import Image
 from io import BytesIO
-from config import API_BASE, SESSION_ROOT
+from config import SESSION_ROOT
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -17,6 +17,7 @@ st.set_page_config(
     page_icon="⚽",
     layout="wide"
 )
+API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
 
 session_id = st.session_state.get("session_id")
 if not session_id:

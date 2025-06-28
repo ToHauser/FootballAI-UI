@@ -1,3 +1,4 @@
+import os
 import uuid
 import streamlit as st
 from streamlit.components.v1 import html
@@ -19,7 +20,7 @@ if st.session_state.get("redirect_to_team_assignment"):
 
 st.title("⚽ Football Video Analyzer")
 
-API_BASE = config.API_BASE
+API_BASE = st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))
 SESSION_ROOT = config.SESSION_ROOT  # relativer Pfad zum Backend
 
 st.markdown("---")
