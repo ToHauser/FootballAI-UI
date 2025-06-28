@@ -35,30 +35,38 @@ st.info("🔐 Bitte notiere dir diese Session-ID, um später wieder auf das Erge
 st.session_state["run_annotate"] = False
 
 
-
 if not st.session_state["redirect_to_only_video_download"]:
     progress_bar = st.progress(0, text="Initialisiere...")
 
     def check_progress():
         try:
-            r = requests.get(f"{API_BASE}/progress/annotator/{session_id}", timeout=5)
+            r = requests.get(f"{API_BASE}/progress/annotator/{session_id}", timeout=60)
             if r.status_code == 200:
                 return r.json()
         except Exception as e:
             print(f"[WARN] Fortschritt nicht abrufbar: {e}")
-        return None  # ← kein Fallback mit 0/1
+        return None
 
-    # 🔁 Polling-Schleife
-    time.sleep(3)
-    progress_data = check_progress()
+    # 🔁 Initialer Versuch mit bis zu 10 Wiederholungen
+    progress_data = None
+    for _ in range(10):
+        progress_data = check_progress()
+        if progress_data:
+            break
+        time.sleep(2)
+
     if not progress_data:
-        st.warning("⏳ Fortschrittsdaten noch nicht verfügbar...")
+        st.warning("⏳ Fortschrittsdaten konnten nicht abgerufen werden...")
         st.stop()
+
+    # 🔁 Fortlaufende Fortschrittsabfrage
     last_update = time.time()
     while True:
         now = time.time()
         if now - last_update >= 2:
-            progress_data = check_progress()
+            new_progress = check_progress()
+            if new_progress:
+                progress_data = new_progress
             last_update = now
 
         current = progress_data["current"]
@@ -72,6 +80,7 @@ if not st.session_state["redirect_to_only_video_download"]:
             break
 
         time.sleep(2)
+
 
 def wait_for_annotation_ready(session_id, max_wait=30):
     for _ in range(max_wait):
