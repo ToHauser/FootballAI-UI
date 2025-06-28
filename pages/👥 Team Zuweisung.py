@@ -30,15 +30,28 @@ if not session_id:
     st.warning("⚠️ Keine Session-ID gefunden.")
     st.stop()
 
+if st.session_state.get("automatic_assignment", False):
+    st.session_state["redirect_to_only_video_download"] = False
+    st.switch_page("pages/🧠 Metrik Analyse.py")
+
+
 # Frames laden
 with st.spinner("Lade Teamzuweisungsdaten..."):
-    r = requests.get(f"{API_BASE}/team-frames/{session_id}")
-    if r.status_code != 200:
-        st.error("❌ Fehler beim Laden der Teamzuweisungsdaten.")
+    for attempt in range(1, 5 + 1):
+        try:
+            r = requests.get(f"{API_BASE}/team-frames/{session_id}", timeout=10)
+            if r.status_code == 200:
+                response_data = r.json()
+                frames = response_data.get("frames", [])
+                team_config = response_data.get("team_config", {})
+                break  # Erfolg: Schleife verlassen
+        except Exception as e:
+            print(f"⚠️ Versuch {attempt}: Fehler beim Laden – {e}")
+        if attempt < 5:
+            time.sleep(2)
+    else:
+        st.error("❌ Fehler beim Laden der Teamzuweisungsdaten nach mehreren Versuchen.")
         st.stop()
-    response_data = r.json()
-    frames = response_data.get("frames", [])
-    team_config = response_data.get("team_config", {})
 
 if not frames:
     st.error("Keine Frames verfügbar.")
@@ -77,12 +90,14 @@ img_b64 = base64.b64encode(buffered.getvalue()).decode()
 # Spieler vorbereiten
 for player in current["players"]:
     pid = str(player["id"])
+    team = str(player.get("team", "1"))  # automatisch zugewiesenes Team oder Default "1"
     if pid not in st.session_state["team_assignments"]:
         st.session_state["team_assignments"][pid] = {
-            "team": "1",
+            "team": team,
             "removed": False,
             "bbox": player["bbox"]
         }
+
 
 # Initialwerte laden
 framewise = st.session_state["framewise_assignments"]

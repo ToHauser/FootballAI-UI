@@ -48,6 +48,7 @@ if "active_session" in st.session_state:
     if r.status_code == 200:
         info = r.json()
         tracking_exists = info["tracking_exists"]
+        view_exists = info["view_exists"]
         assign_exists = info["assign_exists"]
         annotated_exists = info["annotated_exists"]
         team_config = info["team_config"]
@@ -57,14 +58,38 @@ if "active_session" in st.session_state:
 
     st.markdown("### 📄 Vorhandene Artefakte:")
     st.write(f"🎯 Tracking Log: {'✅' if tracking_exists else '❌'}")
-    st.write(f"👥 Team Assignments: {'✅' if assign_exists else '❌'}")
+    st.write(f"🧭 Spielfeld Kalibrierung: {'✅' if view_exists else '❌'}")
+    st.write(f"👥 Team Zuweisung: {'✅' if assign_exists else '❌'}")
     st.write(f"🎬 Annotiertes Video: {'✅' if annotated_exists else '❌'}")
 
     if not tracking_exists and not assign_exists and not annotated_exists:
         st.error(f"❌ Session-Infos konnten nicht geladen werden.")
 
+    if tracking_exists and not view_exists and team_config:
+        if st.button("🧭 Spielfeld kalibrieren"):
+            st.session_state["run_view_transformation"] = True
+
+            if st.session_state.get("run_view_transformation", False):
+                with st.spinner("Generiere Spielfeldkalibrierung..."):
+                    payload = {
+                        "session_id": session_id,
+                        "team1_name": team_config["1"]["name"],
+                        "team1_color": team_config["1"]["color"],
+                        "team2_name": team_config["2"]["name"],
+                        "team2_color": team_config["2"]["color"],
+                    }
+                    r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+
+                    if r.status_code == 200:
+                        st.session_state["session_id"] = session_id
+
+                        st.switch_page("pages/🎯 Spielererkennung.py")
+                    else:
+                        st.error(f"❌ Fehler bei der Annotierung: {r.text}")
+                    del st.session_state["run_annotate"]
+
     # ▶️ Team Assignment starten
-    if tracking_exists and not assign_exists and team_config:
+    if tracking_exists and view_exists and not assign_exists and team_config:
         if st.button("➡️ Starte Team Assignment"):
             st.session_state["run_assignment"] = True
 
@@ -76,12 +101,18 @@ if "active_session" in st.session_state:
                 "team1_color": team_config["1"]["color"],
                 "team2_name": team_config["2"]["name"],
                 "team2_color": team_config["2"]["color"],
+                "run_automatic_assignment": False,
+                "run_manual_assignment": True,
             }
-            r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+            st.session_state["run_manual_assignment"] = True
+            st.session_state["run_assignment"] = False
 
+            r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+            time.sleep(3)
             if r.status_code == 200:
                 # Setze Redirect-Flag und leite weiter
                 st.session_state["redirect_to_team_assignment"] = True
+                st.session_state["redirect_to_only_video_download"] = False
                 st.session_state["session_id"] = session_id
                 st.switch_page("pages/👥 Team Zuweisung.py")
             else:
@@ -89,7 +120,7 @@ if "active_session" in st.session_state:
             del st.session_state["run_assignment"]
 
     # ▶️ Annotiertes Video erzeugen
-    if tracking_exists and assign_exists and not annotated_exists and team_config:
+    if tracking_exists and view_exists and assign_exists and not annotated_exists and team_config:
         if st.button("🎬 Video annotieren"):
             st.session_state["run_annotate"] = True
 
@@ -112,7 +143,7 @@ if "active_session" in st.session_state:
                     else:
                         st.error(f"❌ Fehler bei der Annotierung: {r.text}")
                     del st.session_state["run_annotate"]
-    elif tracking_exists and assign_exists and annotated_exists and team_config:
+    elif tracking_exists and view_exists and assign_exists and annotated_exists and team_config:
         if st.button("🎬 Ergebnisse ansehen"):
             st.session_state["session_id"] = session_id
             st.session_state["redirect_to_only_video_download"] = True
@@ -168,25 +199,49 @@ Alternativ kannst du im Falle größerer Dateien auch einen <strong>Direktlink</
 
 st.write("")  # eine Leerzeile
 
-upload_method = st.radio("Wie möchtest du dein Video bereitstellen?", ["Upload", "Cloud-Link (z. B. Google Drive, OneDrive)"])
+upload_method = st.radio("Wie möchtest du dein Video bereitstellen?", ["Upload", "Cloud-Link (GoogleDrive & DropBox empfohlen)"])
 
 video_file = None
 cloud_link = None
 
 if upload_method == "Upload":
     video_file = st.file_uploader("🎞️ MP4-Datei hochladen", type=["mp4"])
-    st.info("Bitte lade **nur eine Halbzeit** als MP4 hoch. Optimale Größe: <300 MB.")
+    st.info("Bitte lade **nur eine Halbzeit** als MP4 hoch. Optimale Größe: <200MB.")
 else:
-    cloud_link = st.text_input("🔗 Freigabelink einfügen (z. B. OneDrive, Google Drive)")
+    cloud_link = st.text_input("🔗 Freigabelink einfügen (z. B. Google Drive, DropBox) - OneDrive wird nicht unterstützt!")
     st.warning("⚠️ Stelle sicher, dass der Link öffentlich zugänglich ist und direkt auf das Video verweist.")
 
 # -- Run-Optionen
 if video_file or cloud_link:
+    # Session-State initialisieren, wenn nicht vorhanden
+    if "run_assignment" not in st.session_state:
+        st.session_state["run_assignment"] = True
+    if "run_manual_assignment" not in st.session_state:
+        st.session_state["run_manual_assignment"] = False
+
+    def toggle_auto():
+        st.session_state["run_assignment"] = True
+        st.session_state["run_manual_assignment"] = False
+
+    def toggle_manual():
+        st.session_state["run_manual_assignment"] = True
+        st.session_state["run_assignment"] = False
+
     col1, col2 = st.columns(2)
+
     with col1:
-        run_tracking = st.checkbox("Run Tracking", value=True)
+        st.checkbox(
+            "Automatische Teamzuweisung",
+            key="run_assignment",
+            on_change=toggle_auto
+        )
+
     with col2:
-        run_assignment = st.checkbox("Run Team Assignment", value=True)
+        st.checkbox(
+            "Manuelle Teamzuweisung",
+            key="run_manual_assignment",
+            on_change=toggle_manual
+        )
 
     if st.button("🚀 Analyse starten"):
         with st.spinner("Video wird heruntergeladen..."):
@@ -195,11 +250,15 @@ if video_file or cloud_link:
                 "team1_color": team1_color,
                 "team2_name": team2_name,
                 "team2_color": team2_color,
-                "run_tracking": run_tracking,
-                "run_assignment": run_assignment,
+                "run_tracking": True,
+                "run_automatic_assignment": st.session_state.run_assignment and not st.session_state.run_manual_assignment,
+                "run_manual_assignment": st.session_state.run_manual_assignment and not st.session_state.run_assignment,
             }
 
             try:
+                if st.session_state.run_assignment:
+                    st.session_state["automatic_assignment"] = True
+
                 if cloud_link:
                     payload["video_url"] = cloud_link
                     if "session_id" in st.session_state:
