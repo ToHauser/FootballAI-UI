@@ -36,7 +36,7 @@ if st.session_state.get("automatic_assignment", False):
 
 # Warten bis Backend die Teamzuweisung vorbereitet hat
 with st.spinner("Warte auf Abschluss der Teamzuweisungs-Vorbereitung..."):
-    for attempt in range(20):  # max. 20 Versuche = 10 Sekunden
+    for attempt in range(20):  # max. 20 Versuche = 100 Sekunden
         try:
             r = requests.get(f"{API_BASE}/session-info/{session_id}", timeout=5)
             if r.status_code == 200:
@@ -45,7 +45,7 @@ with st.spinner("Warte auf Abschluss der Teamzuweisungs-Vorbereitung..."):
                     break
         except Exception as e:
             print(f"Fehler bei /session-info Abruf: {e}")
-        time.sleep(3)
+        time.sleep(5)
     else:
         st.error("❌ Teamzuweisung noch nicht bereit. Bitte später erneut versuchen.")
         st.stop()
