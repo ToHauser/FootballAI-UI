@@ -89,7 +89,6 @@ st.session_state.setdefault("team_assignments", {})
 st.session_state.setdefault("frame_index", 0)
 st.session_state.setdefault("framewise_assignments", {})
 st.session_state.setdefault("latest_assignments", None)
-st.session_state.setdefault("direction", {"1": None, "2": None})
 
 # Aktueller Frame
 frame_index = st.session_state["frame_index"]
@@ -157,20 +156,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Richtungswahl (inline, schön)
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    st.markdown("""
-    <div style='height: 100%; display: flex; align-items: center; justify-content: flex-start;'>
-        <strong>Spielrichtung der Teams:</strong>
-    </div>
-    """, unsafe_allow_html=True)
-with col2:
-    if st.button(f"⚽ {team_names['1']} spielt links -> rechts"):
-        st.session_state["direction"] = {"1": "left_to_right", "2": "right_to_left"}
-with col3:
-    if st.button(f"⚽ {team_names['2']} spielt links -> rechts"):
-        st.session_state["direction"] = {"1": "right_to_left", "2": "left_to_right"}
 
 display_width = 1050
 scale = display_width / width
@@ -195,7 +180,6 @@ with col2:
 
             payload = {
                 "players": st.session_state["team_assignments"],
-                "directions": st.session_state["direction"]
             }
 
             response = requests.post(f"{API_BASE}/team-assignment/save/{session_id}", json=payload)
