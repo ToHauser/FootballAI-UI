@@ -78,16 +78,18 @@ if "active_session" in st.session_state:
                         "team1_color": team_config["1"]["color"],
                         "team2_name": team_config["2"]["name"],
                         "team2_color": team_config["2"]["color"],
+                        "run_automatic_assignment": False,
+                        "run_manual_assignment": True,
                     }
                     r = requests.post(f"{API_BASE}/annotate_only", data=payload)
 
                     if r.status_code == 200:
                         st.session_state["session_id"] = session_id
-
+                        st.session_state["automatic_assignment"] = False
                         st.switch_page("pages/🎯 Spielererkennung.py")
                     else:
                         st.error(f"❌ Fehler bei der Annotierung: {r.text}")
-                    del st.session_state["run_annotate"]
+                    
 
     # ▶️ Team Assignment starten
     if tracking_exists and view_exists and not assign_exists and team_config:
@@ -133,6 +135,8 @@ if "active_session" in st.session_state:
                         "team1_color": team_config["1"]["color"],
                         "team2_name": team_config["2"]["name"],
                         "team2_color": team_config["2"]["color"],
+                        "run_automatic_assignment": False,
+                        "run_manual_assignment": True,
                     }
                     r = requests.post(f"{API_BASE}/annotate_only", data=payload)
 

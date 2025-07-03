@@ -75,7 +75,7 @@ if tracking_ready and not transformer_ready:
         transformer_ready = session_info.get("view_exists", False)
 
         if transformer_ready:
-            st.session_state["automatic_assignment"] = True
+            st.session_state["automatic_assignment"] = False
             st.success("✅ Transformation abgeschlossen. Weiterleitung...")
             time.sleep(5)
             st.switch_page("pages/👥 Team Zuweisung.py")
