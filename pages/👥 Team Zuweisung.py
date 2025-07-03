@@ -35,27 +35,27 @@ if st.session_state.get("automatic_assignment", False):
     st.switch_page("pages/🧠 Metrik Analyse.py")
 
 
-# Frames laden
+# Frames laden 
 with st.spinner("Lade Teamzuweisungsdaten..."):
-    for attempt in range(1, 5 + 1):
+    frames = []
+    team_config = {}
+    for attempt in range(10):
         try:
-            r = requests.get(f"{API_BASE}/team-frames/{session_id}", timeout=10)
+            r = requests.get(f"{API_BASE}/team-frames/{session_id}", timeout=5)
             if r.status_code == 200:
                 response_data = r.json()
                 frames = response_data.get("frames", [])
                 team_config = response_data.get("team_config", {})
-                break  # Erfolg: Schleife verlassen
+                if frames:
+                    break  # Erfolg
         except Exception as e:
-            print(f"⚠️ Versuch {attempt}: Fehler beim Laden – {e}")
-        if attempt < 5:
-            time.sleep(2)
-    else:
-        st.error("❌ Fehler beim Laden der Teamzuweisungsdaten nach mehreren Versuchen.")
+            print(f"⚠️ Versuch {attempt + 1}: Fehler beim Laden – {e}")
+        time.sleep(2)
+
+    if not frames:
+        st.error("❌ Teamframes konnten nicht geladen werden. Bitte Backend prüfen.")
         st.stop()
 
-if not frames:
-    st.error("Keine Frames verfügbar.")
-    st.stop()
 
 # Farben & Namen definieren
 team_colors = {
