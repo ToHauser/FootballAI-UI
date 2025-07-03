@@ -45,7 +45,7 @@ with st.spinner("Warte auf Abschluss der Teamzuweisungs-Vorbereitung..."):
                     break
         except Exception as e:
             print(f"Fehler bei /session-info Abruf: {e}")
-        time.sleep(0.5)
+        time.sleep(3)
     else:
         st.error("❌ Teamzuweisung noch nicht bereit. Bitte später erneut versuchen.")
         st.stop()
