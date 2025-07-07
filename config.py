@@ -7,5 +7,8 @@ import streamlit as st
 
 SESSION_ROOT = "../02_FootballAI/sessions"  # relativer Pfad zum Backend
 
+API_BASE_PATH = "/api/v1/sessions"
+
+
 def get_api_base():
     return st.secrets.get("API_BASE", os.getenv("API_BASE", "http://localhost:8000"))

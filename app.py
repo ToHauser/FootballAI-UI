@@ -6,6 +6,7 @@ import requests
 import time
 import config
 import streamlit as st
+from config import API_BASE_PATH
 
 st.set_page_config(
     page_title="Startseite | FootballAI",
@@ -21,6 +22,10 @@ if st.session_state.get("redirect_to_team_assignment"):
 st.title("⚽ Football Video Analyzer")
 
 API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
+
+def api_url(endpoint: str) -> str:
+    return f"{API_BASE.rstrip('/')}{API_BASE_PATH.rstrip('/')}/{endpoint.lstrip('/')}"
+
 SESSION_ROOT = config.SESSION_ROOT  # relativer Pfad zum Backend
 
 st.markdown("---")
@@ -40,7 +45,7 @@ with st.expander("Session-ID eingeben und fortfahren", expanded=True):
 # Verarbeite bekannte Session
 if "active_session" in st.session_state:
     session_id = st.session_state["active_session"]
-    r = requests.get(f"{API_BASE}/session-info/{session_id}")
+    r = requests.get(api_url(f"{session_id}"))
     tracking_exists = False
     assign_exists = False
     annotated_exists = False
@@ -271,7 +276,7 @@ if video_file or cloud_link:
                     st.session_state["session_id"] = f"{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
                     
                     payload["session_id"] = st.session_state.get("session_id")                 
-                    r = requests.post(f"{API_BASE}/process-link", json=payload, headers={"accept": "application/json"})
+                    r = requests.post(api_url(f"{session_id}/video-from-link"), json=payload, headers={"accept": "application/json"})
                     if r.status_code != 200:
                         print("❌ Upload-Fehler:", r.text)
                         try:
@@ -290,9 +295,8 @@ if video_file or cloud_link:
                     
                     st.session_state["session_id"] = f"{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
                     
-                    payload["session_id"] = st.session_state.get("session_id")  
                     files = {"file": (video_file.name, video_file, "video/mp4")}
-                    r = requests.post(f"{API_BASE}/upload", files=files, data=payload, headers={"accept": "application/json"})
+                    r = requests.post(api_url(f"{session_id}/video"), files=files, data=payload, headers={"accept": "application/json"})
                     if r.status_code != 200:
                         print("❌ Upload-Fehler:", r.text)
                         try:

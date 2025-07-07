@@ -2,12 +2,15 @@ import os
 import streamlit as st
 import time
 import requests
-
+from config import API_BASE_PATH
 
 # === Konfiguration ===
 st.set_page_config(page_title="Fortschritt | FootballAI", page_icon="⚽", layout="wide")
 
 API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
+def api_url(endpoint: str) -> str:
+    return f"{API_BASE.rstrip('/')}{API_BASE_PATH.rstrip('/')}/{endpoint.lstrip('/')}"
+
 session_id = st.session_state.get("session_id")
 if not session_id:
     st.error("❌ Keine Session aktiv.")
@@ -35,7 +38,7 @@ def check_progress(mode):
 
 def check_session_info():
     try:
-        r = requests.get(f"{API_BASE}/session-info/{session_id}", timeout=10)
+        r = requests.get(api_url(f"{session_id}"), timeout=10)
         if r.status_code == 200:
             return r.json()
     except Exception as e:

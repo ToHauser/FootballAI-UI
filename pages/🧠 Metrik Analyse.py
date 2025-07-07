@@ -1,7 +1,7 @@
 # 📁 pages/VideoResult.py
 import base64
 import os
-
+from config import API_BASE_PATH
 import pandas as pd
 import streamlit as st
 import time
@@ -18,6 +18,9 @@ st.set_page_config(
     layout="wide"
 )
 API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
+
+def api_url(endpoint: str) -> str:
+    return f"{API_BASE.rstrip('/')}{API_BASE_PATH.rstrip('/')}/{endpoint.lstrip('/')}"
 
 session_id = st.session_state.get("session_id")
 if not session_id:
@@ -86,7 +89,7 @@ if not st.session_state["redirect_to_only_video_download"]:
 def wait_for_annotation_ready(session_id, max_wait=30):
     for _ in range(max_wait):
         try:
-            r = requests.get(f"{API_BASE}/session-info/{session_id}")
+            r = requests.get(api_url(f"{session_id}"))
             if r.status_code == 200:
                 info = r.json()
                 if info.get("annotated_exists", False):

@@ -8,7 +8,7 @@ from PIL import Image
 import requests
 import base64
 import io
-import config
+import config 
 from streamlit_team_component.my_component import my_component
 
 
@@ -22,6 +22,8 @@ if "active_session" in st.session_state:
 
 
 API_BASE = st.secrets["API_BASE"] if "API_BASE" in st.secrets else os.getenv("API_BASE", "http://localhost:8000")
+def api_url(endpoint: str) -> str:
+    return f"{API_BASE.rstrip('/')}{config.API_BASE_PATH.rstrip('/')}/{endpoint.lstrip('/')}"
 
 # Session-ID laden
 session_id = st.session_state.get("session_id", None)
@@ -38,13 +40,13 @@ if st.session_state.get("automatic_assignment", False):
 with st.spinner("Warte auf Abschluss der Teamzuweisungs-Vorbereitung..."):
     for attempt in range(20):  # max. 20 Versuche = 100 Sekunden
         try:
-            r = requests.get(f"{API_BASE}/session-info/{session_id}", timeout=5)
+            r = requests.get(api_url(f"{session_id}"))
             if r.status_code == 200:
                 info = r.json()
                 if info.get("assignment_notification_exists"):
                     break
         except Exception as e:
-            print(f"Fehler bei /session-info Abruf: {e}")
+            print(f"Fehler bei session-info Abruf: {e}")
         time.sleep(5)
     else:
         st.error("❌ Teamzuweisung noch nicht bereit. Bitte später erneut versuchen.")
