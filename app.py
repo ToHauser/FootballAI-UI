@@ -271,8 +271,7 @@ if video_file or cloud_link:
                     if "session_id" in st.session_state:
                         del st.session_state["session_id"]
                     st.session_state["session_id"] = f"{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-                    
-                    payload["session_id"] = st.session_state.get("session_id")                 
+                                 
                     r = requests.post(api_url(f"{session_id}/video-from-link"), json=payload, headers={"accept": "application/json"})
                     if r.status_code != 200:
                         print("❌ Upload-Fehler:", r.text)
@@ -283,7 +282,8 @@ if video_file or cloud_link:
 
                         st.error(f"❌ {error_msg}")
                     else:
-                        st.info(f"📁 Session-ID: `{payload['session_id']}`")
+                        st.info(f"📁 Session-ID: `{session_id}`")
+
                         time.sleep(5)
                         st.switch_page("pages/🎯 Spielererkennung.py")
                 else:
@@ -304,7 +304,7 @@ if video_file or cloud_link:
                         st.error(f"❌ {error_msg}")
 
                     else:
-                        st.info(f"📁 Session-ID: `{payload['session_id']}`")
+                        st.info(f"📁 Session-ID: `{session_id}`")
                         time.sleep(5)
                         st.switch_page("pages/🎯 Spielererkennung.py")                
 
