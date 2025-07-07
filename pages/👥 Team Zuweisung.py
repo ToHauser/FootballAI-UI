@@ -59,7 +59,8 @@ with st.spinner("Lade Teamzuweisungsdaten..."):
     team_config = {}
     for attempt in range(10):
         try:
-            r = requests.get(f"{API_BASE}/team-frames/{session_id}", timeout=5)
+            r = requests.get(api_url(f"{session_id}/team-assignment/frames"), timeout=10)
+
             if r.status_code == 200:
                 response_data = r.json()
                 frames = response_data.get("frames", [])
@@ -183,8 +184,8 @@ with col2:
             payload = {
                 "players": st.session_state["team_assignments"],
             }
-
-            response = requests.post(f"{API_BASE}/team-assignment/save/{session_id}", json=payload)
+            
+            response = requests.post(api_url(f"{session_id}/team-assignment/save-manual"), json=payload)
             respone_global = response.status_code
 
 with col2:

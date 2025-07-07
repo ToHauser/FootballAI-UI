@@ -44,7 +44,7 @@ if not st.session_state["redirect_to_only_video_download"]:
 
     def check_progress():
         try:
-            r = requests.get(f"{API_BASE}/progress/annotator/{session_id}", timeout=60)
+            r = requests.get(api_url(f"{session_id}/progress/annotator"), timeout=10)
             if r.status_code == 200:
                 return r.json()
         except Exception as e:
@@ -106,7 +106,8 @@ if wait_for_annotation_ready(session_id):
     st.markdown("---")
     st.subheader("🔢 KPI Übersicht zur analysierten Sequenz")
     st.write("")
-    r = requests.get(f"{API_BASE}/metrics-summary/{session_id}")
+    
+    r = requests.get(api_url(f"{session_id}/results/metrics/summary"))
     team1 = None
     team2 = None
 
@@ -292,7 +293,7 @@ if wait_for_annotation_ready(session_id):
     dir1 = "unbekannt"
     dir2 = "unbekannt"
     try:
-        team_direction_result = requests.get(f"{API_BASE}/get-directions/{session_id}")
+        team_direction_result = requests.get(api_url(f"{session_id}/team-assignment/directions"))
 
 
         if team_direction_result.status_code == 200:
@@ -349,8 +350,8 @@ if wait_for_annotation_ready(session_id):
 
 
     # 📸 URLs zu den Heatmap-Bildern
-    url_team1 = f"{API_BASE}/heatmap/{session_id}/{team1['name']}"
-    url_team2 = f"{API_BASE}/heatmap/{session_id}/{team2['name']}"
+    url_team1 = api_url(f"{session_id}/results/heatmaps/{team1['name']}")
+    url_team2 = api_url(f"{session_id}/results/heatmaps/{team2['name']}")
 
     # 🔁 Bis zu 5 Versuche zum Laden der Heatmaps
     max_retries = 5
@@ -374,7 +375,7 @@ if wait_for_annotation_ready(session_id):
 
         @st.cache_data(show_spinner="🧠 Generiere Heatmaps...")
         def trigger_heatmap_generation(session_id):
-            url = f"{API_BASE}/generate-heatmaps/{session_id}"
+            url = api_url(f"{session_id}/results/heatmaps/generate")
             return requests.post(url)
 
         response = trigger_heatmap_generation(session_id)
@@ -417,7 +418,7 @@ if wait_for_annotation_ready(session_id):
     with col1:
         st.markdown(
             f"""
-            <a href="{API_BASE}/metrics-excel/{session_id}" style="text-decoration: none;">
+            <a href="{api_url(f"{session_id}/results/metrics/excel")}" style="text-decoration: none;">
                 <div style="
                     display: flex;
                     align-items: center;
@@ -441,7 +442,7 @@ if wait_for_annotation_ready(session_id):
     with middle:
         st.markdown(
             f"""
-            <a href="{API_BASE}/generate-heatmaps/{session_id}" style="text-decoration: none;">
+            <a href="{api_url(f"{session_id}/results/heatmaps/generate")}" style="text-decoration: none;">
                 <div style="
                     display: flex;
                     align-items: center;
@@ -467,7 +468,7 @@ if wait_for_annotation_ready(session_id):
     with col2:
         st.markdown(
             f"""
-            <a href="{API_BASE}/annotated-video/{session_id}" download style="text-decoration: none;">
+            <a href="{api_url(f"{session_id}/results/video")}" download style="text-decoration: none;">
                 <div style="
                     display: flex;
                     align-items: center;

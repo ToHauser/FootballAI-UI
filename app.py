@@ -78,7 +78,6 @@ if "active_session" in st.session_state:
             if st.session_state.get("run_view_transformation", False):
                 with st.spinner("Generiere Spielfeldkalibrierung..."):
                     payload = {
-                        "session_id": session_id,
                         "team1_name": team_config["1"]["name"],
                         "team1_color": team_config["1"]["color"],
                         "team2_name": team_config["2"]["name"],
@@ -86,7 +85,7 @@ if "active_session" in st.session_state:
                         "run_automatic_assignment": False,
                         "run_manual_assignment": True,
                     }
-                    r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+                    r = requests.post(api_url(f"{session_id}/process"), data=payload)
 
                     if r.status_code == 200:
                         st.session_state["session_id"] = session_id
@@ -104,7 +103,6 @@ if "active_session" in st.session_state:
     if st.session_state.get("run_assignment", False):
         with st.spinner("Starte Teamzuweisung..."):
             payload = {
-                "session_id": session_id,
                 "team1_name": team_config["1"]["name"],
                 "team1_color": team_config["1"]["color"],
                 "team2_name": team_config["2"]["name"],
@@ -115,7 +113,7 @@ if "active_session" in st.session_state:
             st.session_state["run_manual_assignment"] = True
             st.session_state["run_assignment"] = False
 
-            r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+            r = requests.post(api_url(f"{session_id}/process"), data=payload)
             time.sleep(3)
             if r.status_code == 200:
                 # Setze Redirect-Flag und leite weiter
@@ -135,7 +133,6 @@ if "active_session" in st.session_state:
             if st.session_state.get("run_annotate", False):
                 with st.spinner("Erstelle annotiertes Video..."):
                     payload = {
-                        "session_id": session_id,
                         "team1_name": team_config["1"]["name"],
                         "team1_color": team_config["1"]["color"],
                         "team2_name": team_config["2"]["name"],
@@ -143,7 +140,7 @@ if "active_session" in st.session_state:
                         "run_automatic_assignment": False,
                         "run_manual_assignment": True,
                     }
-                    r = requests.post(f"{API_BASE}/annotate_only", data=payload)
+                    r = requests.post(api_url(f"{session_id}/process"), data=payload)
 
                     if r.status_code == 200:
                         st.session_state["session_id"] = session_id

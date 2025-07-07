@@ -29,7 +29,7 @@ progress_bar = st.progress(0, text="Initialisiere Tracking...")
 # === API-Helper ===
 def check_progress(mode):
     try:
-        r = requests.get(f"{API_BASE}/progress/{mode}/{session_id}", timeout=10)
+        r = requests.get(api_url(f"{session_id}/progress/{mode}"), timeout=10)
         if r.status_code == 200:
             return r.json()
     except Exception as e:
@@ -47,7 +47,7 @@ def check_session_info():
 
 def check_team_frames():
     try:
-        r = requests.get(f"{API_BASE}/team-frames/{session_id}", timeout=10)
+        r = requests.get(api_url(f"{session_id}/team-assignment/frames"), timeout=10)
         return r.status_code == 200
     except Exception:
         return False
