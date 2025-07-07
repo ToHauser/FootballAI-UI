@@ -271,7 +271,7 @@ if video_file or cloud_link:
                     if "session_id" in st.session_state:
                         del st.session_state["session_id"]
                     st.session_state["session_id"] = f"{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-                                 
+                    session_id = st.session_state["session_id"]           
                     r = requests.post(api_url(f"{session_id}/video-from-link"), json=payload, headers={"accept": "application/json"})
                     if r.status_code != 200:
                         print("❌ Upload-Fehler:", r.text)
@@ -291,7 +291,8 @@ if video_file or cloud_link:
                         del st.session_state["session_id"]
                     
                     st.session_state["session_id"] = f"{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-                    
+                    session_id = st.session_state["session_id"]
+
                     files = {"file": (video_file.name, video_file, "video/mp4")}
                     r = requests.post(api_url(f"{session_id}/video"), files=files, data=payload, headers={"accept": "application/json"})
                     if r.status_code != 200:
