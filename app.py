@@ -222,9 +222,9 @@ else:
 if video_file or cloud_link:
     # Session-State initialisieren, wenn nicht vorhanden
     if "run_assignment" not in st.session_state:
-        st.session_state["run_assignment"] = True
+        st.session_state["run_assignment"] = False
     if "run_manual_assignment" not in st.session_state:
-        st.session_state["run_manual_assignment"] = False
+        st.session_state["run_manual_assignment"] = True
 
     def toggle_auto():
         st.session_state["run_assignment"] = True
