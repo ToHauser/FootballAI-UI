@@ -125,6 +125,8 @@ if wait_for_annotation_ready(session_id):
             "team_2_goals": ("Tore", "team2"),
             "team_1_shots": ("Torschüsse", "team1"),
             "team_2_shots": ("Torschüsse", "team2"),
+            "team_1_passes": ("Pässe", "team1"),
+            "team_2_passes": ("Pässe", "team2"),
             "team_1_distance_m": ("Distanz (m)", "team1"),
             "team_2_distance_m": ("Distanz (m)", "team2"),
             "team_1_avg_speed_kmh": ("Ø Geschwindigkeit (km/h)", "team1"),
