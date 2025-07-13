@@ -46,6 +46,8 @@ def check_session_info():
     return {}
 
 def check_team_frames():
+    if st.session_state.get("automatic_assignment"):
+        return False  # kein check nötig im automatischen Modus
     try:
         r = requests.get(api_url(f"{session_id}/team-assignment/frames"), timeout=10)
         return r.status_code == 200
@@ -58,7 +60,10 @@ tracking_ready = session_info.get("tracking_exists", False)
 transformer_ready = session_info.get("view_exists", False)
 
 # === Schneller Exit bei abgeschlossenem Prozess
-if tracking_ready and transformer_ready and check_team_frames():
+if tracking_ready and transformer_ready and (
+    (st.session_state.get("automatic_assignment") is True)
+    or check_team_frames()
+):
     if st.session_state.get("automatic_assignment"):
         st.success("✅ Automatische Teamzuweisung abgeschlossen. Weiterleitung...")
         st.session_state["redirect_to_only_video_download"] = False
@@ -117,11 +122,21 @@ while True:
         progress = check_progress("transformer")
         pct = progress["current"] / progress["total"] if progress["total"] > 0 else 0
         progress_bar.progress(pct, text=f"View Transformation: {int(pct * 100)}%")
-
-        if transformer_ready and check_team_frames():
-            st.success("✅ Tracking & Transformation abgeschlossen. Weiterleitung...")
-            time.sleep(5)
-            st.switch_page("pages/👥 Team Zuweisung.py")
+       
+        if transformer_ready and (
+            st.session_state.get("automatic_assignment") is True
+            or check_team_frames()
+        ):
+            if st.session_state.get("automatic_assignment"):
+                st.success("✅ Automatische Teamzuweisung abgeschlossen. Weiterleitung...")
+                st.session_state["redirect_to_only_video_download"] = False
+                time.sleep(2)
+                st.switch_page("pages/🧠 Metrik Analyse.py")
+            else:
+                st.success("✅ Tracking & Transformation abgeschlossen. Weiterleitung...")
+                time.sleep(2)
+                st.switch_page("pages/👥 Team Zuweisung.py")
             st.stop()
+            
 
     time.sleep(0.5)
