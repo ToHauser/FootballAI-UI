@@ -98,14 +98,23 @@ if tracking_ready and not transformer_ready:
 phase_header.markdown("### 🔄 Tracking läuft...")
 in_tracking_phase = True
 transformer_announced = False
+# Fortschritt nur alle 5 Sekunden abfragen
+last_progress_check = 0
+progress_cache = {"current": 0, "total": 1}  # initialer Dummywert
 
 while True:
     session_info = check_session_info()
     tracking_ready = session_info.get("tracking_exists", False)
     transformer_ready = session_info.get("view_exists", False)
 
+    now = time.time()
+    should_check_progress = now - last_progress_check >= 5
+
     if in_tracking_phase:
-        progress = check_progress("tracking")
+        if should_check_progress:
+            progress = check_progress("tracking")
+            last_progress_check = now
+
         pct = progress["current"] / progress["total"] if progress["total"] > 0 else 0
         progress_bar.progress(pct, text=f"Tracking: {int(pct * 100)}%")
 
@@ -119,7 +128,10 @@ while True:
             phase_header.markdown("### 🧭 Starte Spielfeld-Transformation...")
             transformer_announced = True
 
-        progress = check_progress("transformer")
+        if should_check_progress:
+            progress = check_progress("transformer")
+            last_progress_check = now
+
         pct = progress["current"] / progress["total"] if progress["total"] > 0 else 0
         progress_bar.progress(pct, text=f"View Transformation: {int(pct * 100)}%")
        
@@ -139,4 +151,4 @@ while True:
             st.stop()
             
 
-    time.sleep(0.5)
+    time.sleep(1)
