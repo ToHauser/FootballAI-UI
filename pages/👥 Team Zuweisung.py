@@ -107,7 +107,7 @@ img_b64 = base64.b64encode(buffered.getvalue()).decode()
 
 # Spieler vorbereiten
 for player in current["players"]:
-    pid = str(player["id"])
+    pid = player["id"]
     team = str(player.get("team", "1"))  # automatisch zugewiesenes Team oder Default "1"
     if pid not in st.session_state["team_assignments"]:
         st.session_state["team_assignments"][pid] = {
