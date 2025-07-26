@@ -370,6 +370,8 @@ if wait_for_annotation_ready(session_id):
             break
         else:
             print(f"❌ Attempt {attempt+1} failed: Heatmaps not available yet.")
+            sec = (attempt * 3) + 5
+            time.sleep(sec)
         
 
     # 🔨 Nur wenn nach 3 Versuchen keine Heatmaps gefunden wurden → Generieren
