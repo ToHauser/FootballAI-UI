@@ -371,7 +371,7 @@ if wait_for_annotation_ready(session_id):
         else:
             print(f"❌ Attempt {attempt+1} failed: Heatmaps not available yet.")
             sec = (attempt * 3) + 5
-            time.sleep(sec)
+            time.sleep(1)
         
 
     # 🔨 Nur wenn nach 3 Versuchen keine Heatmaps gefunden wurden → Generieren
@@ -381,7 +381,7 @@ if wait_for_annotation_ready(session_id):
         @st.cache_data(show_spinner="🧠 Generiere Heatmaps...")
         def trigger_heatmap_generation(session_id):
             url = api_url(f"{session_id}/results/heatmaps/generate")
-            return requests.post(url)
+            return requests.post(url, timeout=600)
 
         response = trigger_heatmap_generation(session_id)
 

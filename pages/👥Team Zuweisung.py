@@ -130,7 +130,7 @@ assignments = framewise.get(str(frame_index), {
 # 🏷️ Titel mit Teamnamen und Farbkacheln
 st.markdown(f"""
 <h2 style='margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem;'>
-  Team Assignment für
+  Team Assignment for
   <span style='display: inline-flex; align-items: center;'>
     <span style='width: 16px; height: 16px; background-color: {team_colors['1']}; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle;'></span>
     {team_names['1']}
@@ -148,16 +148,17 @@ st.write("")
 # 📘 Beschreibung zur Steuerung
 st.markdown(f"""
 <div style='margin-bottom: 1.5rem; font-size: 0.95rem;'>
-  Auf dieser Seite legen Sie die <strong>Spielrichtung</strong> sowie die <strong>Teamzuweisung</strong> der Spieler fest.
-  Dies ermöglicht eine präzisere Analyse und Erkennung relevanter Spielmetriken.<br><br>
-  Durch einen <b>Klick</b> auf eine Person wird diese dem Team <b>{team_names['2']}</b> 
-  <span style='display: inline-block; width: 12px; height: 12px; background-color: {team_colors['2']}; border-radius: 3px; margin-left: 6px;'></span> zugewiesen.<br>
-  Ein erneuter Klick weist diese wieder <b>{team_names['1']}</b> 
-  <span style='display: inline-block; width: 12px; height: 12px; background-color: {team_colors['1']}; border-radius: 3px; margin-left: 6px;'></span> zu.<br><br>
-  Gelegentlich können Personen wie Schiedsrichter fälschlich als Spieler erkannt worden sein. 
-  Mit <b>Shift + Klick</b> markieren Sie diese als "kein Spieler" (grau dargestellt).
+  On this page, you define the <strong>playing direction</strong> and the <strong>team assignment</strong> of the players.
+  This enables more precise analysis and detection of relevant game metrics.<br><br>
+  A <b>click</b> on a person assigns them to team <b>{team_names['2']}</b> 
+  <span style='display: inline-block; width: 12px; height: 12px; background-color: {team_colors['2']}; border-radius: 3px; margin-left: 6px;'></span>.<br>
+  Clicking again reassigns them to <b>{team_names['1']}</b> 
+  <span style='display: inline-block; width: 12px; height: 12px; background-color: {team_colors['1']}; border-radius: 3px; margin-left: 6px;'></span>.<br><br>
+  Occasionally, individuals such as referees may be mistakenly detected as players. 
+  Use <b>Shift + Click</b> to mark them as "not a player" (displayed in grey).
 </div>
 """, unsafe_allow_html=True)
+
 
 
 display_width = 1050
