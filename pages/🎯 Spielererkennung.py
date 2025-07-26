@@ -92,7 +92,7 @@ if tracking_ready and not transformer_ready:
         progress = check_progress("transformer")
         pct = progress["current"] / progress["total"] if progress["total"] > 0 else 0
         progress_bar.progress(pct, text=f"View Transformation: {int(pct * 100)}%")
-        time.sleep(0.5)
+        time.sleep(2)
 
 # === Modus: Tracking läuft noch
 phase_header.markdown("### 🔄 Tracking läuft...")
