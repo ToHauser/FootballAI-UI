@@ -1,4 +1,3 @@
-# 📁 pages/VideoResult.py
 import base64
 import os
 from config import API_BASE_PATH
@@ -13,7 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Video Ergebnis | FootballAI",
+    page_title="Video Results | FootballAI",
     page_icon="⚽",
     layout="wide"
 )
@@ -24,23 +23,22 @@ def api_url(endpoint: str) -> str:
 
 session_id = st.session_state.get("session_id")
 if not session_id:
-    st.warning("⚠️ Keine Session-ID gefunden.")
+    st.warning("⚠️ No session ID found.")
     st.stop()
 if "active_session" in st.session_state:
     del st.session_state["active_session"]
-    
+
 if "automatic_assignment" in st.session_state:
     del st.session_state["automatic_assignment"]
 
-st.title("🧠 Metrik Analyse")
+st.title("🧠 Metric Analysis")
 st.write("")
-st.markdown(f"**📁 Session-ID:** `{session_id}`")
-st.info("🔐 Bitte notiere dir diese Session-ID, um später wieder auf das Ergebnis zugreifen zu können.")
+st.markdown(f"**📁 Session ID:** `{session_id}`")
+st.info("🔐 Please save this session ID to revisit the results later.")
 st.session_state["run_annotate"] = False
 
-
 if not st.session_state["redirect_to_only_video_download"]:
-    progress_bar = st.progress(0, text="Initialisiere...")
+    progress_bar = st.progress(0, text="Initializing...")
 
     def check_progress():
         try:
@@ -48,10 +46,9 @@ if not st.session_state["redirect_to_only_video_download"]:
             if r.status_code == 200:
                 return r.json()
         except Exception as e:
-            print(f"[WARN] Fortschritt nicht abrufbar: {e}")
+            print(f"[WARN] Could not retrieve progress: {e}")
         return None
 
-    # 🔁 Initialer Versuch mit bis zu 10 Wiederholungen
     progress_data = None
     for _ in range(10):
         progress_data = check_progress()
@@ -60,10 +57,9 @@ if not st.session_state["redirect_to_only_video_download"]:
         time.sleep(2)
 
     if not progress_data:
-        st.warning("⏳ Fortschrittsdaten konnten nicht abgerufen werden...")
+        st.warning("⏳ Could not retrieve progress data...")
         st.stop()
 
-    # 🔁 Fortlaufende Fortschrittsabfrage
     last_update = time.time()
     while True:
         now = time.time()
@@ -77,14 +73,13 @@ if not st.session_state["redirect_to_only_video_download"]:
         total = progress_data["total"]
         pct = current / total if total > 0 else 0
 
-        progress_bar.progress(pct, text=f"🎥 Fortschritt: {int(pct * 100)}%")
+        progress_bar.progress(pct, text=f"🎥 Progress: {int(pct * 100)}%")
 
         if current >= total:
-            st.success("✅ Annotiertes Video fertiggestellt! Das Video ist jeden Moment zum Download verfügbar.")
+            st.success("✅ Annotated video completed! The video will be available for download shortly.")
             break
 
         time.sleep(2)
-
 
 def wait_for_annotation_ready(session_id, max_wait=30):
     for _ in range(max_wait):
@@ -99,14 +94,12 @@ def wait_for_annotation_ready(session_id, max_wait=30):
         time.sleep(3)
     return False
 
-
-
-# 📊 Metriken anzeigen
+# 📊 Display metrics
 if wait_for_annotation_ready(session_id):
     st.markdown("---")
-    st.subheader("🔢 KPI Übersicht zur analysierten Sequenz")
+    st.subheader("🔢 KPI Summary of the Analyzed Sequence")
     st.write("")
-    
+
     r = requests.get(api_url(f"{session_id}/results/metrics/summary"))
     team1 = None
     team2 = None
@@ -117,41 +110,33 @@ if wait_for_annotation_ready(session_id):
         team1 = response["team_1"]
         team2 = response["team_2"]
 
-        # 🧠 Metriken umbenennen und gruppieren
         metrics_mapping = {
-            "team_1_possession_percent": ("Ballbesitz (%)", "team1"),
-            "team_2_possession_percent": ("Ballbesitz (%)", "team2"),
-            "team_1_goals": ("Tore", "team1"),
-            "team_2_goals": ("Tore", "team2"),
-            "team_1_shots": ("Torschüsse", "team1"),
-            "team_2_shots": ("Torschüsse", "team2"),
-            "team_1_passes": ("Pässe", "team1"),
-            "team_2_passes": ("Pässe", "team2"),
-            "team_1_distance_m": ("Distanz (m)", "team1"),
-            "team_2_distance_m": ("Distanz (m)", "team2"),
-            "team_1_avg_speed_kmh": ("Ø Geschwindigkeit (km/h)", "team1"),
-            "team_2_avg_speed_kmh": ("Ø Geschwindigkeit (km/h)", "team2"),
-            "space_control_avg_team_1": ("Raumkontrolle gesamt (%)", "team1"),
-            "space_control_avg_team_2": ("Raumkontrolle gesamt (%)", "team2"),
-            "thirds_control_avg_defensive_team_1": ("Defensiv-Kontrolle (%)", "team1"),
-            "thirds_control_avg_defensive_team_2": ("Defensiv-Kontrolle (%)", "team2"),
-            "thirds_control_avg_middle_team_1": ("Mittelfeld-Kontrolle (%)", "team1"),
-            "thirds_control_avg_middle_team_2": ("Mittelfeld-Kontrolle (%)", "team2"),
-            "thirds_control_avg_attacking_team_1": ("Offensiv-Kontrolle (%)", "team1"),
-            "thirds_control_avg_attacking_team_2": ("Offensiv-Kontrolle (%)", "team2"),
+            "team_1_possession_percent": ("Possession (%)", "team1"),
+            "team_2_possession_percent": ("Possession (%)", "team2"),
+            "team_1_goals": ("Goals", "team1"),
+            "team_2_goals": ("Goals", "team2"),
+            "team_1_shots": ("Shots", "team1"),
+            "team_2_shots": ("Shots", "team2"),
+            "team_1_passes": ("Passes", "team1"),
+            "team_2_passes": ("Passes", "team2"),
+            "team_1_distance_m": ("Distance (m)", "team1"),
+            "team_2_distance_m": ("Distance (m)", "team2"),
+            "team_1_avg_speed_kmh": ("Avg. Speed (km/h)", "team1"),
+            "team_2_avg_speed_kmh": ("Avg. Speed (km/h)", "team2"),
+            "space_control_avg_team_1": ("Overall Space Control (%)", "team1"),
+            "space_control_avg_team_2": ("Overall Space Control (%)", "team2"),
+            "thirds_control_avg_defensive_team_1": ("Defensive Control (%)", "team1"),
+            "thirds_control_avg_defensive_team_2": ("Defensive Control (%)", "team2"),
+            "thirds_control_avg_middle_team_1": ("Midfield Control (%)", "team1"),
+            "thirds_control_avg_middle_team_2": ("Midfield Control (%)", "team2"),
+            "thirds_control_avg_attacking_team_1": ("Offensive Control (%)", "team1"),
+            "thirds_control_avg_attacking_team_2": ("Offensive Control (%)", "team2"),
         }
 
-        # 🔢 Aufteilen nach Team
         team1_metrics = {v[0]: summary[k] for k, v in metrics_mapping.items() if v[1] == "team1"}
         team2_metrics = {v[0]: summary[k] for k, v in metrics_mapping.items() if v[1] == "team2"}
 
         def colored_header(team: dict):
-            """
-            Zeigt einen farbigen Header mit Farbkästchen und Teamnamen an.
-
-            Args:
-                team (dict): z. B. {"name": "VFB", "color": "#0000FF"}
-            """
             st.markdown(f"""
             <div style='display: flex; align-items: center; gap: 8px; margin-bottom: 10px;'>
                 <div style='width: 18px; height: 18px; background-color: {team['color']}; border-radius: 3px;'></div>
@@ -167,52 +152,47 @@ if wait_for_annotation_ready(session_id):
                 </div>
             """, unsafe_allow_html=True)
 
-        # 📐 Anzeige in zwei Spalten
         col_l, col_r = st.columns(2)
         with col_l:
             colored_header(team1)
             for label, value in team1_metrics.items():
-                label_clean = label.replace("team_1_", "").replace("_", " ")
-                colored_metric(label_clean, value, team1["color"])
+                colored_metric(label, value, team1["color"])
 
         with col_r:
             colored_header(team2)
             for label, value in team2_metrics.items():
-                label_clean = label.replace("team_2_", "").replace("_", " ")
-                colored_metric(label_clean, value, team2["color"])
+                colored_metric(label, value, team2["color"])
 
         st.markdown("---")
-        st.subheader("📊 Radarvergleich der Teams")
+        st.subheader("📊 Radar Comparison of the Teams")
         st.markdown("""
         <div style='font-size: 1rem; line-height: 1.6;'>
-            Die Radar-Grafik bietet einen kompakten Überblick über die wichtigsten Teammetriken im direkten Vergleich.
-            Jeder Wert ist relativ normiert, sodass beide Teams auf derselben Skala (0–100 %) dargestellt werden können.         Je näher die Fläche an den äußeren Rand des Diagramms ragt, desto dominanter war das jeweilige Team in diesem Aspekt.
-            <br><br>
+            The radar chart provides a compact overview of key metrics in direct comparison. 
+            Each value is normalized (0–100 %) to allow equal scaling. The closer the area gets to the edge, the more dominant the performance in that aspect.
         </div>
         """, unsafe_allow_html=True)
-        with st.expander("📊 Interpretation der Radar-Grafik anzeigen"):
+        with st.expander("📊 Show Radar Chart Interpretation"):
             st.markdown("""
-            <div style='font-size: 0.9rem; line-height: 1.6;'>
-                <ul style='padding-left: 1.3em; margin-top: 0.5em;'>
-                    <li><b>Torschüsse</b> und <b>Tore</b> geben Auskunft über die offensive Effektivität.</li>
-                    <li><b>Ballbesitz</b> steht für Spielkontrolle – ein hoher Wert signalisiert dominantes Spiel mit vielen Passsequenzen.</li>
-                    <li><b>Distanzen</b> und <b>Geschwindigkeit</b> spiegeln Laufbereitschaft und Tempo wider – wichtig für Umschaltspiel und Pressingintensität.</li>
-                    <li>Die drei <b>Kontrollzonen</b> (Offensiv, Mittelfeld, Defensiv) zeigen, in welchen Spielfeldbereichen ein Team die meiste Präsenz hatte.</li>
-                </ul>
-            </div>
+            <ul>
+                <li><b>Shots</b> and <b>Goals</b> indicate offensive effectiveness.</li>
+                <li><b>Possession</b> reflects match control – a high value signals dominant play and passing sequences.</li>
+                <li><b>Distance</b> and <b>Speed</b> reflect physical effort and tempo – important for transitions and pressing intensity.</li>
+                <li><b>Control Zones</b> indicate spatial dominance across field thirds.</li>
+            </ul>
             """, unsafe_allow_html=True)
 
         # Metriken fürs Spiderweb
         spider_labels = [
-            "Ballbesitz (%)",
-            "Tore",
-            "Torschüsse",
-            "Distanz (m)",
-            "Ø Geschwindigkeit (km/h)",
-            "Offensiv-Kontrolle (%)",
-            "Mittelfeld-Kontrolle (%)",
-            "Defensiv-Kontrolle (%)"
+            "Possession (%)",
+            "Goals",
+            "Shots",
+            "Distance (m)",
+            "Avg. Speed (km/h)",
+            "Offensive Control (%)",
+            "Midfield Control (%)",
+            "Defensive Control (%)"
         ]
+
 
         # Werte für beide Teams vorbereiten
         values_team1 = []
@@ -289,11 +269,12 @@ if wait_for_annotation_ready(session_id):
     st.markdown("---")
     # Getting Team Directions from Backend
     dir_map = {
-        "left_to_right": "von links nach rechts",
-        "right_to_left": "von rechts nach links"
+        "left_to_right": "left to right",
+        "right_to_left": "right to left"
     }
     dir1 = "unbekannt"
     dir2 = "unbekannt"
+
     try:
         team_direction_result = requests.get(api_url(f"{session_id}/team-assignment/directions"))
 
@@ -312,7 +293,8 @@ if wait_for_annotation_ready(session_id):
     dir1_text = dir_map.get(dir1, "unbekannt")
     dir2_text = dir_map.get(dir2, "unbekannt")
 
-    st.markdown(f'## 📷 Laufwege der Teams')
+    st.markdown("## 📷 Team Movement Heatmaps")
+
     st.markdown("""
     <style>
     .small-expander-text {
@@ -324,26 +306,27 @@ if wait_for_annotation_ready(session_id):
     # 📄 Einleitung mit Spielrichtung
     st.markdown(f"""
     <div style='font-size: 1rem; line-height: 1.6;'>
-        Die folgenden Heatmaps zeigen die verdichteten Laufwege beider Teams über das gesamte Spielfeld. 
-        Warme Farben (z. B. <b>Rot</b>) stehen für stark frequentierte Zonen, während <b>blaue Bereiche</b> auf selten betretene Räume hindeuten. Nachstehend finden Sie einmal die Spielrichtungen der analysierten Teams sowie eine aufklappbare Hilfe zur Interpretation solcher Heatmaps.
+        The following heatmaps show the aggregated movement patterns of both teams across the entire field. 
+        Warm colors (e.g., <b>red</b>) indicate frequently visited zones, whereas <b>blue areas</b> indicate rarely visited zones.
+        Below, you will find the attacking directions of both teams as well as an expandable section with guidance on how to interpret these heatmaps.
         <br>
-        📌 <b>Spielrichtungen:</b><br>
+        📌 <b>Team directions:</b><br>
         &emsp;▶️ <b>{team1['name']}</b>: <i>{dir1_text}</i><br>
         &emsp;◀️ <b>{team2['name']}</b>: <i>{dir2_text}</i>
-        <br> <br>
+        <br><br>
     </div>
     """, unsafe_allow_html=True)
 
 
     # 🔍 Interpretation im Expander
-    with st.expander("🧠 Interpretation der Heatmaps anzeigen"):
+    with st.expander("🧠 Show heatmap interpretation"):
         st.markdown("""
         <div style='font-size:1rem; line-height:1.5;'>
             <ul style='padding-left: 1.2em; margin-top: 0.5em;'>
-                <li style='font-size:1rem;'><b>Hohe Aktivität im rechten Offensivdrittel</b> (bei Spielrichtung <i>links → rechts</i>) kann auf <b>anhaltende Druckphasen</b> oder <b>häufige Flankenläufe</b> hindeuten.</li>
-                <li style='font-size:1rem;'><b>Starke Präsenz im eigenen Strafraum</b> deutet auf <b>defensives Verhalten</b> oder Druckphasen des Gegners hin.</li>
-                <li style='font-size:1rem;'><b>Zentrierte Heatmaps</b> sprechen für ein <b>vertikales Spiel durchs Zentrum</b>.</li>
-                <li style='font-size:1rem;'><b>Flügelbetonte Verteilungen</b> deuten auf <b>breites Aufbauspiel</b> oder <b>Halbraumüberladungen</b> hin.</li>
+                <li><b>High activity in the right attacking third</b> (when playing <i>left → right</i>) may indicate <b>sustained pressure phases</b> or <b>frequent wing attacks</b>.</li>
+                <li><b>Strong presence in the own penalty area</b> suggests <b>defensive behavior</b> or <b>opponent pressure phases</b>.</li>
+                <li><b>Centered heatmaps</b> point to a <b>vertical, central attacking style</b>.</li>
+                <li><b>Wing-heavy patterns</b> suggest <b>wide build-up play</b> or <b>half-space overloads</b>.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -400,24 +383,22 @@ if wait_for_annotation_ready(session_id):
     with col1:
         if r1.status_code == 200:
             image1 = Image.open(BytesIO(r1.content))
-            direction_str = "Links → Rechts" if dir1 == "left_to_right" else "Links ← Rechts"
-            st.image(image1, caption=f"Laufwege von {team1['name']} ({direction_str})", use_container_width=True)
+            direction_str = "Left → Right" if dir1 == "left_to_right" else "Left ← Right"
+            st.image(image1, caption=f"Movement heatmap of {team1['name']} ({direction_str})", use_container_width=True)
         else:
-            st.error("❌ Heatmap für Team 1 nicht gefunden.")
+            st.error("❌ Heatmap for Team 1 not found.")
 
-    # 🖼️ Team 2 Heatmap
     with col2:
         if r2.status_code == 200:
             image2 = Image.open(BytesIO(r2.content))
-            direction_str = "Links → Rechts" if dir2 == "left_to_right" else "Links ← Rechts"
-            st.image(image2, caption=f"Laufwege von {team2['name']} ({direction_str})", use_container_width=True)
+            direction_str = "Left → Right" if dir2 == "left_to_right" else "Left ← Right"
+            st.image(image2, caption=f"Movement heatmap of {team2['name']} ({direction_str})", use_container_width=True)
         else:
-            st.error("❌ Heatmap für Team 2 nicht gefunden.")
+            st.error("❌ Heatmap for Team 2 not found.")
 
     st.markdown("---")
-    st.markdown("## 📊 KPI-Daten exportieren")
+    st.markdown("## 📊 Export KPI Data")
     st.write("")
-
     col1, middle, col2 = st.columns(3)
 
     with col1:
@@ -436,14 +417,16 @@ if wait_for_annotation_ready(session_id):
                     color: white;
                     font-weight: 500;
                     font-size: 16px;
-                    transition: background-color 0.2s ease;
-                " onmouseover="this.style.backgroundColor='#33333322'" onmouseout="this.style.backgroundColor='transparent'">
-                    📈 <span>Excel herunterladen</span>
+                    transition: background-color 0.2s ease;"
+                    onmouseover="this.style.backgroundColor='#33333322'" 
+                    onmouseout="this.style.backgroundColor='transparent'">
+                    📈 <span>Download Excel</span>
                 </div>
             </a>
             """,
             unsafe_allow_html=True
         )
+
     with middle:
         st.markdown(
             f"""
@@ -463,7 +446,7 @@ if wait_for_annotation_ready(session_id):
                     transition: background-color 0.2s ease;"
                     onmouseover="this.style.backgroundColor='#33333322'" 
                     onmouseout="this.style.backgroundColor='transparent'">
-                    🗺️ <span>Laufwege herunterladen</span>
+                    🗺️ <span>Download Movement Maps</span>
                 </div>
             </a>
             """,
@@ -489,10 +472,11 @@ if wait_for_annotation_ready(session_id):
                     transition: background-color 0.2s ease;"
                     onmouseover="this.style.backgroundColor='#33333322'" 
                     onmouseout="this.style.backgroundColor='transparent'">
-                    📥 <span>Spielsequenz mit Metriken herunterladen</span>
+                    📥 <span>Download Annotated Match Video</span>
                 </div>
             </a>
             """,
             unsafe_allow_html=True
         )
+
     st.markdown("---")
