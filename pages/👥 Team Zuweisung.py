@@ -32,7 +32,7 @@ if not session_id:
 
 if st.session_state.get("automatic_assignment", False):
     st.session_state["redirect_to_only_video_download"] = False
-    st.switch_page("pages/🧠 Metric Analysis.py")
+    st.switch_page("pages/🧠 Metrik Analyse.py")
 
 # Wait for backend to prepare team assignment
 with st.spinner("Waiting for team assignment preparation to complete..."):
@@ -199,7 +199,7 @@ if respone_global is not None and respone_global == 200:
     st.success("✅ Team assignment successfully saved. Please wait for the video to be processed...")
     st.session_state["redirect_to_only_video_download"] = False
     time.sleep(2.0)
-    st.switch_page("pages/🧠 Metric Analysis.py")
+    st.switch_page("pages/🧠 Metrik Analyse.py")
 elif respone_global is not None and respone_global != 200:
     st.error(f"❌ Error saving assignment: {respone_global}. Please try again.")
 
