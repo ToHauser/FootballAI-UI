@@ -22,7 +22,7 @@ FootballAI/                 # Main folder
 
 1. **Clone the frontend repository**
    ```bash
-   git clone https://github.com/Cykalele/FootballAI_UI.git
+   git clone https://github.com/ToHauser/FootballAI_UI.git
    cd FootballAI_UI
     ```
 2. **Create and activate a virtual environment**
@@ -38,4 +38,3 @@ FootballAI/                 # Main folder
     ```
 4. **Run the Backend**
     The frontend will automatically connect to the backend if started via the backend's start.bat script.
-    
