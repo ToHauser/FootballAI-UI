@@ -2,10 +2,9 @@ import os
 import requests
 import streamlit as st
 # config.py
-#API_BASE = "https://pest-berry-competitors-timothy.trycloudflare.com"
 
 
-SESSION_ROOT = "../02_FootballAI/sessions"  # relativer Pfad zum Backend
+SESSION_ROOT = "../FootballAI_Backend/sessions"  # relativer Pfad zum Backend
 
 API_BASE_PATH = "/api/v1/sessions"
 
