@@ -7,7 +7,7 @@ It provides an interactive environment for uploading videos, assigning teams, ru
 
 ## ⚠️ Important Note
 
-This frontend must be used **together with** the [FootballAI Backend](https://github.com/Cykalele/FootballAI_Backend).  
+This frontend must be used **together with** the [FootballAI Backend](https://github.com/ToHauser/FootballAI_Backend).  
 Both must be placed inside the same parent directory:
 
 ## 📂 Recommended Directory Structure
@@ -15,7 +15,7 @@ Both must be placed inside the same parent directory:
 ```plaintext
 FootballAI/                 # Main folder
 ├── FootballAI_Backend/     # Clone from backend repo
-└── FootballAI_UI/          # Clone from frontend repo
+└── FootballAI_Frontend/          # Clone from frontend repo
 ```
 
 ## 🚀 Getting Started
